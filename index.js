@@ -47,6 +47,16 @@ const settings = {
   token:(process.env.BOT_TOKEN)
 }
 
+    function getVal (val) {
+      multiplier = val.substr(-1).toLowerCase();
+      if (multiplier == "k")
+        return parseFloat(val) * 1000
+      else if (multiplier == "m")
+        return parseFloat(val) * 1000000;
+      else 
+        return parseFloat(val)
+    }
+
 //Whenever someone types a message this gets activated.
 //(If you use 'await' in your functions make sure you put async here)
 client.on('message', async message => {
@@ -85,8 +95,8 @@ client.on('message', async message => {
 
   if (command === 'atb') {
     //eco.AddToBalance(UserID, toAdd)
-    var profile = await eco.AddToBalance(message.author.id, 50000)
-      message.channel.send(`Added 50,000 credits to ${message.author.tag}'s wallet!`)
+    var profile = await eco.AddToBalance(message.author.id, 500)
+      message.channel.send(`Added 500 credits to ${message.author.tag}'s wallet!`)
   }
 
   if (command === 'resetdaily') {
@@ -138,14 +148,15 @@ client.on('message', async message => {
 
     var user = message.mentions.users.first()
     var amount = args[1]
+    var aVal = getVal(amount);
 
     if (!user) return message.reply('Reply the user you want to send money to!')
     if (!amount) return message.reply('Specify the amount you want to pay!')
 
     var output = await eco.FetchBalance(message.author.id)
-    if (output.balance < amount) return message.reply('You have fewer coins than the amount you want to transfer!')
+    if (output.balance < aVal) return message.reply('You have fewer coins than the amount you want to transfer!')
 
-    var transfer = await eco.Transfer(message.author.id, user.id, amount)
+    var transfer = await eco.Transfer(message.author.id, user.id, aVal)
     message.reply(`Transfering coins successfully done!\nBalance from ${message.author.tag}: ${transfer.FromUser}\nBalance from ${user.tag}: ${transfer.ToUser}`);
   }
 
@@ -154,19 +165,8 @@ if (command === 'fp') {
     var amount = args[0] //Heads or Tails
     var flip = args[1] //Coins to gamble
 
-    function getVal (val) {
-      multiplier = val.substr(-1).toLowerCase();
-      if (multiplier == "k")
-        return parseFloat(val) * 1000
-      else if (multiplier == "m")
-        return parseFloat(val) * 1000000;
-      else 
-        return parseFloat(val)
-    }
-
-    var aVal = getVal(amount);
     // editted to accept more types of input
-    if (!flip || !['heads', 'tails','head','tail','h','t'].includes(flip)) return message.reply('Please specify the flip, either heads or tails!')
+    if (!flip || !['heads', 'tails','head','tail','h','t', 'all'].includes(flip)) return message.reply('Please specify the flip, either heads or tails!')
     
     // converts all heads to heads
     if (['heads','head','h'].includes(flip))
@@ -179,6 +179,15 @@ if (command === 'fp') {
     if (!amount) return message.reply('Specify the amount you want to gamble!')
 
     var output = await eco.FetchBalance(message.author.id)
+    var aVal = output.balance
+
+    // all test
+    if (amount == 'all') {
+       var aVal = output.balance || output.balance < 1 
+    } else {
+       var aVal = getVal(amount);
+    }
+
     if (output.balance < aVal) return message.reply('You have fewer coins than the amount you want to gamble!')
 
     //substituted the flip to flip2
@@ -191,14 +200,15 @@ if (command === 'fp') {
 
     var roll = args[0] //Should be a number between 1 and 6
     var amount = args[1] //Coins to gamble
+    var aVal = getVal(amount);
 
     if (!roll || ![1, 2, 3, 4, 5, 6].includes(parseInt(roll))) return message.reply('Specify the roll, it should be a number between 1-6')
     if (!amount) return message.reply('Specify the amount you want to gamble!')
 
     var output = eco.FetchBalance(message.author.id)
-    if (output.balance < amount) return message.reply('You have fewer coins than the amount you want to gamble!')
+    if (output.balance < aVal) return message.reply('You have fewer coins than the amount you want to gamble!')
 
-    var gamble = await eco.Dice(message.author.id, roll, amount).catch(console.error)
+    var gamble = await eco.Dice(message.author.id, roll, aVal).catch(console.error)
     message.reply(`The dice rolled ${gamble.dice}. So you ${gamble.output}! New balance: ${gamble.newbalance}`)
 
   }
