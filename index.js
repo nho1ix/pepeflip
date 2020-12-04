@@ -93,12 +93,6 @@ client.on('message', async message => {
 
   }
 
-  if (command === 'atb') {
-    //eco.AddToBalance(UserID, toAdd)
-    var profile = await eco.AddToBalance(message.author.id, 500)
-      message.channel.send(`Added 500 credits to ${message.author.tag}'s wallet!`)
-  }
-
   if (command === 'resetdaily') {
 
     var output = await eco.ResetDaily(message.author.id)
@@ -107,7 +101,7 @@ client.on('message', async message => {
 
   }
 
-  if (command === 'leaderboard') {
+  if (command === 'lb') {
 
     //If you use discord-economy guild based you can use the filter() function to only allow the database within your guild
     //(message.author.id + message.guild.id) can be your way to store guild based id's
