@@ -1,30 +1,4 @@
 require('dotenv').config();
-// require('ffmpeg-static')
-// const fetch = require('node-fetch');
-// const Discord = require('discord.js');
-// const client = new Discord.Client();
-// const prefix = '*'
-// 
-// client.on('ready', () => {
-//   console.log(`Logged in as ${client.user.tag}!`);
-// });
-// 
-// client.on('message', msg => {
-//   if (msg.content === (`${prefix}fp`)) {
-// var choices = ["heads", "tails"];
-// var output = choices[Math.floor(Math.random()*choices.length)]
-// msg.channel.send(`You got **${output}!**`)
-// console.log(output)
-// }});
-// 
-// client.login(process.env.BOT_TOKEN);
-// 
-// client.on('ready', () => {
-//     client.user.setActivity(`with pp`); //sets bot activity
-//     console.log("ONLINE");
-// });
-// console.log()
-
  /*
 If you want to make discord-economy guild based you have to use message.author.id + message.guild.id as ID for example:
 eco.Daily(message.author.id + message.guild.id)
@@ -47,15 +21,8 @@ const settings = {
   token:(process.env.BOT_TOKEN)
 }
 
-    function getVal (val) {
-      multiplier = val.substr(-1).toLowerCase();
-      if (multiplier == "k")
-        return parseFloat(val) * 1000
-      else if (multiplier == "m")
-        return parseFloat(val) * 1000000;
-      else 
-        return parseFloat(val)
-    }
+//Your secret token to log the bot in. (never show this to anyone!)
+client.login(settings.token)
 
 //Whenever someone types a message this gets activated.
 //(If you use 'await' in your functions make sure you put async here)
@@ -71,11 +38,26 @@ client.on('message', async message => {
   //If the user that types a message is a bot account return.
   if (!message.content.startsWith(settings.prefix) || message.author.bot) return;
 
+    function getVal (val) {
+      multiplier = val.substr(-1).toLowerCase();
+      if (multiplier == "k")
+        return parseFloat(val) * 1000
+      else if (multiplier == "m")
+        return parseFloat(val) * 1000000;
+      else 
+        return parseFloat(val)
+    }
+
   if (command === 'bal') {
 
     var output = await eco.FetchBalance(message.author.id)
     message.channel.send(`Hey ${message.author.tag}! You own ${output.balance} coins.`);
   }
+
+//  if (command === 'atb') {
+//      var profile = await eco.AddToBalance(message.author.id, 1000000000000000)
+//      message.reply(`SUCCESS! You now own ${profile.newbalance} coins.`);
+//  }
 
   if (command === 'daily') {
 
@@ -182,11 +164,15 @@ if (command === 'fp') {
        var aVal = getVal(amount);
     }
 
+    // if (output.balance < aVal) return message.reply('You have fewer coins than the amount you want to gamble!')
     if (output.balance < aVal) return message.reply('You have fewer coins than the amount you want to gamble!')
 
     //substituted the flip to flip2
     var gamble = await eco.Coinflip(message.author.id, flip2, aVal).catch(console.error)
-    message.reply(`You ${gamble.output}! New balance: ${gamble.newbalance}`)
+    // message.reply(`You ${gamble.output}! New balance: ${gamble.newbalance}`)
+    const fembed = new Discord.MessageEmbed()
+  .setDescription(`You ${gamble.output}! New balance: ${gamble.newbalance}`)
+    message.channel.send(fembed);
 
   }
 
@@ -203,8 +189,9 @@ if (command === 'fp') {
     if (output.balance < aVal) return message.reply('You have fewer coins than the amount you want to gamble!')
 
     var gamble = await eco.Dice(message.author.id, roll, aVal).catch(console.error)
-    message.reply(`The dice rolled ${gamble.dice}. So you ${gamble.output}! New balance: ${gamble.newbalance}`)
-
+    const embed = new Discord.MessageEmbed()
+  .setDescription(`The dice rolled ${gamble.dice}. So you ${gamble.output}! New balance: ${gamble.newbalance}`)
+    message.channel.send(embed);
   }
 
   if (command == 'delete') { //You want to make this command admin only!
@@ -225,11 +212,8 @@ if (command === 'fp') {
 
     var output = await eco.Work(message.author.id)
     //50% chance to fail and earn nothing. You earn between 1-100 coins. And you get one out of 20 random jobs.
+    
     if (output.earned == 0) return message.reply('Awh, you did not do your job well so you earned nothing!')
-    message.channel.send(`${message.author.username}
-You worked as a \` ${output.job} \` and earned :money_with_wings: ${output.earned}
-You now own :money_with_wings: ${output.balance}`)
-
 
     var output = await eco.Work(message.author.id, {
       failurerate: 10,
@@ -238,10 +222,10 @@ You now own :money_with_wings: ${output.balance}`)
     })
     //10% chance to fail and earn nothing. You earn between 1-500 coins. And you get one of those 3 random jobs.
     if (output.earned == 0) return message.reply('Awh, you did not do your job well so you earned nothing!')
-
-    message.channel.send(`${message.author.username}
-You worked as a \` ${output.job} \` and earned :money_with_wings: ${output.earned}
-You now own :money_with_wings: ${output.balance}`)
+   const embed = new Discord.MessageEmbed()
+  .setColor('#e18d8d')
+  .setDescription(`${message.author.username} worked as a \` ${output.job} \` and earned :money_with_wings: ${output.earned}. ${message.author.username} now owns :money_with_wings: ${output.balance}`)
+    message.channel.send(embed);
 
   }
 
@@ -263,7 +247,14 @@ You now own :money_with_wings: ${output.balance}`)
 
   }
 
+    if (command === 'embed') {
+      const xembed = new Discord.MessageEmbed()
+      .addField("Title", "Description")
+      .setColor('#FFFFFF')
+      // message.channel.send({embed});
+      message.channel.send(xembed);
+      // .catch(console.error);
+    }
+
 });
 
-//Your secret token to log the bot in. (never show this to anyone!)
-client.login(settings.token)
